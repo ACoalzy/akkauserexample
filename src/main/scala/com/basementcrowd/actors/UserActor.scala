@@ -7,10 +7,14 @@ final case class Organisation(id: String, name: String, email: String, `type`: S
 case class User(id: String, organisation: Organisation, address: Address, firstName: String, lastName: String, email: String, salutation: String, telephone: String, `type`: String)
 
 object UserActor {
+  type MsgResult = Either[Message, Message]
+
   final case class GetUser(id: String)
   final case class CreateUser(user: User)
-  final case class UpdateUser(user: User)
+  final case class UpdateUser(id: String, user: User)
   final case class DeleteUser(id: String)
+
+  final case class Message(msg: String)
 
   def props(users: Map[String, User]): Props = Props(new UserActor(users))
 }
@@ -23,24 +27,26 @@ class UserActor(initialUsers: Map[String, User]) extends Actor {
   override def receive: Receive = {
     case GetUser(id) => sender() ! users.get(id)
     case CreateUser(user) => {
-      if (users.keySet.exists(_ == user.id)) sender() ! false
+      if (users.keySet.exists(_ == user.id)) sender() ! Left(Message("Cannot create User as User with that ID already exists."))
       else {
         users += user.id -> user
-        sender() ! true
+        sender() ! Right(Message("User created."))
       }
     }
-    case UpdateUser(user) => {
-      if (users.keySet.exists(_ == user.id)) {
+    case UpdateUser(id, user) => {
+      if (id != user.id && users.keySet.exists(_ == user.id)) sender() ! Left(Message("New User ID clashes with another user."))
+      else if (users.keySet.exists(_ == id)) {
+        users -= id
         users += user.id -> user
-        sender() ! true
+        sender() ! Right(Message("User updated."))
       }
-      else sender() ! false
+      else sender() ! Left(Message("User not found."))
     }
     case DeleteUser(id) =>
       if (users.keySet.exists(_ == id)) {
         users -= id
-        sender() ! true
+        sender() ! Right(Message("User deleted."))
       }
-      else sender() ! false
+      else sender() ! Left(Message("User not found."))
   }
 }
