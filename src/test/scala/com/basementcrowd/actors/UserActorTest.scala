@@ -3,6 +3,7 @@ package com.basementcrowd.actors
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
 import com.basementcrowd.actors.UserActor.{Message, MsgResult}
+import com.basementcrowd.model.User
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 import org.mockito.Mockito.when
