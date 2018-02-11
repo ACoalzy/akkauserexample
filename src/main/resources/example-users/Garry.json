@@ -1,0 +1,29 @@
+{  
+   "organisation":{  
+      "name":"Garry Org",
+      "email":"garryorg@garry.com",
+      "id":"o2",
+      "address":{  
+         "city":"London",
+         "postCode":"CD1 2EF",
+         "line1":"1 Shiny Street",
+         "id":"a3",
+         "line2":""
+      },
+      "type":"chambers"
+   },
+   "email":"garry@garry.com",
+   "lastName":"Arry",
+   "firstName":"Garry",
+   "id":"u2",
+   "salutation":"Mr",
+   "address":{  
+      "city":"London",
+      "postCode":"GA4 4RY",
+      "line1":"40 Something Street",
+      "id":"a4",
+      "line2":""
+   },
+   "telephone":"01234567890",
+   "type":"barrister"
+}

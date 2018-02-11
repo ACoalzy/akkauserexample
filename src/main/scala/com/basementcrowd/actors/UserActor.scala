@@ -11,7 +11,7 @@ object UserActor {
   final case class UpdateUser(id: String, user: User)
   final case class DeleteUser(id: String)
 
-  final case class Message(msg: String)
+  case class Message(msg: String)
 
   def props(users: Map[String, User]): Props = Props(new UserActor(users))
 }

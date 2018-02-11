@@ -77,6 +77,13 @@ class UserActorTest(_system: ActorSystem) extends TestKit(_system) with FunSuite
     assert(f.update("1", user) == Right(Message("User updated.")))
   }
 
+  test("cannot update user to id of another user") {
+    val oldUser = mockUser("1")
+    val blockingUser = mockUser("2")
+    val f = fixture(Map("1" -> oldUser, "2" -> blockingUser))
+    assert(f.update("1", blockingUser) == Left(Message("New User ID clashes with another user.")))
+  }
+
   test("update user updates user in actor") {
     val oldUser = mockUser("1")
     val newUser = mockUser("1")
@@ -91,13 +98,6 @@ class UserActorTest(_system: ActorSystem) extends TestKit(_system) with FunSuite
     val f = fixture(Map("1" -> oldUser))
     f.update("1", newUser)
     assert(f.get("2") == Some(newUser))
-  }
-
-  test("cannot update user to id of another user") {
-    val oldUser = mockUser("1")
-    val blockingUser = mockUser("2")
-    val f = fixture(Map("1" -> oldUser, "2" -> blockingUser))
-    assert(f.update("1", blockingUser) == Left(Message("New User ID clashes with another user.")))
   }
 
   test("delete user returns true if user was there") {

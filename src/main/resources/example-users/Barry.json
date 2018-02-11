@@ -1,0 +1,29 @@
+{  
+   "organisation":{  
+      "name":"Barry Org",
+      "email":"barryorg@barry.com",
+      "id":"o1",
+      "address":{  
+         "city":"London",
+         "postCode":"AB1 2CD",
+         "line1":"Apt 30",
+         "id":"a1",
+         "line2":"3 Example Street"
+      },
+      "type":"chambers"
+   },
+   "email":"barry@barry.com",
+   "lastName":"Arry",
+   "firstName":"Barry",
+   "id":"u1",
+   "salutation":"Mr",
+   "address":{  
+      "city":"London",
+      "postCode":"BA4 4RY",
+      "line1":"30 Something Lane",
+      "id":"a2",
+      "line2":""
+   },
+   "telephone":"01234567890",
+   "type":"barrister"
+}
