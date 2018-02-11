@@ -7,8 +7,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import akka.pattern.ask
-import com.basementcrowd.actors.UserActor
 import com.basementcrowd.actors.UserActor.MsgResult
+import com.basementcrowd.actors.UserActor
 import com.basementcrowd.model.User
 import com.basementcrowd.utils.JsonSupport
 

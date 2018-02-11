@@ -55,37 +55,37 @@ class UserRoutesTest extends FunSuite with ScalaFutures with ScalatestRouteTest 
 
   test("POST /user handles success") {
     val request = Post(uri = "/user").withEntity(dummyEntity)
-    setupProbe(UserActor.CreateUser(dummyUser), Right(dummyMsg))
+    setupProbe(UserActor.CreateUser(dummyUser), Future(Right(dummyMsg)))
     checkMsg(request, StatusCodes.OK, dummyMsg)
   }
 
   test("POST /user handles id already present") {
     val request = Post(uri = "/user").withEntity(dummyEntity)
-    setupProbe(UserActor.CreateUser(dummyUser), Left(dummyMsg))
+    setupProbe(UserActor.CreateUser(dummyUser), Future(Left(dummyMsg)))
     checkMsg(request, StatusCodes.Conflict, dummyMsg)
   }
 
   test("PUT /user/id handles success") {
     val request = Put(uri = "/user/123").withEntity(dummyEntity)
-    setupProbe(UserActor.UpdateUser("123", dummyUser), Right(dummyMsg))
+    setupProbe(UserActor.UpdateUser("123", dummyUser), Future(Right(dummyMsg)))
     checkMsg(request, StatusCodes.OK, dummyMsg)
   }
 
   test("PUT /user/id handles failure") {
     val request = Put(uri = "/user/123").withEntity(dummyEntity)
-    setupProbe(UserActor.UpdateUser("123", dummyUser), Left(dummyMsg))
+    setupProbe(UserActor.UpdateUser("123", dummyUser), Future(Left(dummyMsg)))
     checkMsg(request, StatusCodes.Conflict, dummyMsg)
   }
 
   test("DELETE /user/id handles success") {
     val request = Delete(uri = "/user/123")
-    setupProbe(UserActor.DeleteUser("123"), Right(dummyMsg))
+    setupProbe(UserActor.DeleteUser("123"), Future(Right(dummyMsg)))
     checkMsg(request, StatusCodes.OK, dummyMsg)
   }
 
   test("DELETE /user/id handles id not being found") {
     val request = Delete(uri = "/user/123")
-    setupProbe(UserActor.DeleteUser("123"), Left(dummyMsg))
+    setupProbe(UserActor.DeleteUser("123"), Future(Left(dummyMsg)))
     checkMsg(request, StatusCodes.NotFound, dummyMsg)
   }
 }

@@ -1,16 +1,16 @@
 {  
    "organisation":{  
-      "name":"Barry Org",
-      "email":"harryorg@barry.com",
+      "name":"",
+      "email":"",
       "id":"o1",
       "address":{  
-         "city":"London",
-         "postCode":"AB1 2CD",
-         "line1":"Apt 30",
+         "city":"",
+         "postCode":"",
+         "line1":"",
          "id":"a1",
-         "line2":"3 Example Street"
+         "line2":""
       },
-      "type":"chambers"
+      "type":""
    },
    "email":"harry@harry.com",
    "lastName":"Arry",
@@ -18,9 +18,9 @@
    "id":"u3",
    "salutation":"Mr",
    "address":{  
-      "city":"London",
-      "postCode":"HA4 4RY",
-      "line1":"30 Something Road",
+      "city":"",
+      "postCode":"",
+      "line1":"",
       "id":"a5",
       "line2":""
    },
