@@ -1,6 +1,7 @@
 package com.basementcrowd.actors
 
 import akka.actor.{Actor, Props}
+import akka.http.scaladsl.model.StatusCodes
 import com.basementcrowd.model.{Address, Organisation, User}
 
 object UserMapActor {
@@ -50,15 +51,15 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     * @param user
     * @return
     */
-  private def createUser(user: User): MsgResult =
+  private def createUser(user: User): Response =
     users.get(user.id) match {
-      case Some(_) => Left(Message("Cannot create User as User with that ID already exists."))
+      case Some(_) => Response(Message("Cannot create User as User with that ID already exists."), StatusCodes.Conflict)
       case None => getOrgAndAddress(user) match {
         case Right(user) => {
           users += user.id -> user
-          Right(Message("User created."))
+          Response(Message("User created."), StatusCodes.Created)
         }
-        case Left(m) => Left(m)
+        case Left(m) => Response(m, StatusCodes.Conflict)
       }
     }
 
@@ -73,19 +74,19 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     * @param user
     * @return
     */
-  private def updateUser(id: String, user: User): MsgResult = {
+  private def updateUser(id: String, user: User): Response = {
     val toUpdate = users.get(id)
     val updateTo = if (id != user.id) users.get(user.id) else None
     (toUpdate, updateTo) match {
-      case (None, _) => Left(Message("User not found."))
-      case (_, Some(_)) => Left(Message("New User ID clashes with another user."))
+      case (None, _) => Response(Message("User not found."), StatusCodes.NotFound)
+      case (_, Some(_)) => Response(Message("New User ID clashes with another user."), StatusCodes.Conflict)
       case (Some(_), _) => getOrgAndAddress(user) match {
         case Right(user) => {
           users -= id
           users += user.id -> user
-          Right(Message("User updated."))
+          Response(Message("User updated."), StatusCodes.OK)
         }
-        case Left(m) => Left(m)
+        case Left(m) => Response(m, StatusCodes.Conflict)
       }
     }
   }
@@ -97,12 +98,12 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     * @param id
     * @return
     */
-  private def deleteUser(id: String): MsgResult =
+  private def deleteUser(id: String): Response =
     users.get(id) match {
       case Some(_) => {
         users -= id
-        Right(Message("User deleted."))
+        Response(Message("User deleted."), StatusCodes.OK)
       }
-      case None => Left(Message("User not found."))
+      case None => Response(Message("User not found."), StatusCodes.NotFound)
     }
 }

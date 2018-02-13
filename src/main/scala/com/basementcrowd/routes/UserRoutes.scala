@@ -1,13 +1,13 @@
 package com.basementcrowd.routes
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.{StatusCode, StatusCodes}
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
 import com.basementcrowd.actors.UserHandler
-import com.basementcrowd.actors.UserHandler.MsgResult
+import com.basementcrowd.actors.UserHandler.{CRUD, Response}
 import com.basementcrowd.model.User
 import com.basementcrowd.utils.JsonSupport
 
@@ -30,9 +30,8 @@ trait UserRoutes extends JsonSupport {
           userIdRoute(_)
         },
         post {
-          entity(as[User]) { user =>
-            val userUpdated: Future[MsgResult] = (userActor ? UserHandler.CreateUser(user)).mapTo[MsgResult]
-            chooseStatus(StatusCodes.Conflict, StatusCodes.Created, userUpdated)
+          entity(as[User]) {
+            user => processBasicCRUDRequest(UserHandler.CreateUser(user))
           }
         }
       )
@@ -54,31 +53,25 @@ trait UserRoutes extends JsonSupport {
         }
       },
       put {
-        entity(as[User]) { user =>
-          val userUpdated: Future[MsgResult] = (userActor ? UserHandler.UpdateUser(id, user)).mapTo[MsgResult]
-          chooseStatus(StatusCodes.Conflict, StatusCodes.Created, userUpdated)
+        entity(as[User]) {
+          user => processBasicCRUDRequest(UserHandler.UpdateUser(id, user))
         }
       },
       delete {
-        val userDeleted: Future[MsgResult] = (userActor ? UserHandler.DeleteUser(id)).mapTo[MsgResult]
-        chooseStatus(StatusCodes.NotFound, StatusCodes.OK, userDeleted)
+        processBasicCRUDRequest(UserHandler.DeleteUser(id))
       }
     )
   }
 
   /**
-    * Choose left or right status based on future choice being a Left or Right
-    *
-    * @param lStatus
-    * @param rStatus
-    * @param choice
+    * Send CRUD request to actor, wait for response and separate into tuple for json parsing
+    * @param crud
     * @return
     */
-  private def chooseStatus(lStatus: StatusCode, rStatus: StatusCode, choice: Future[MsgResult]): Route =
-    onSuccess(choice) {
-      _ match {
-        case Left(m) => complete((lStatus, m))
-        case Right(m) => complete((rStatus, m))
-      }
+  private def processBasicCRUDRequest(crud: CRUD): Route = {
+    val response: Future[Response] = (userActor ? crud).mapTo[Response]
+    onSuccess(response) {
+      case r => complete((r.statusCode, r.message))
     }
+  }
 }

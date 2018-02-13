@@ -1,8 +1,9 @@
 package com.basementcrowd.actors
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.http.scaladsl.model.StatusCodes
 import akka.testkit.{TestKit, TestProbe}
-import com.basementcrowd.actors.UserHandler.{Message, MsgResult}
+import com.basementcrowd.actors.UserHandler.{Message, Response}
 import com.basementcrowd.model.{Address, Organisation, User}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -25,11 +26,11 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
 
     def get(id: String) = tell[Option[User]](userActor, probe)(UserHandler.GetUser(id))
 
-    def create(user: User) = tell[MsgResult](userActor, probe)(UserHandler.CreateUser(user))
+    def create(user: User) = tell[Response](userActor, probe)(UserHandler.CreateUser(user))
 
-    def update(id: String, user: User) = tell[MsgResult](userActor, probe)(UserHandler.UpdateUser(id, user))
+    def update(id: String, user: User) = tell[Response](userActor, probe)(UserHandler.UpdateUser(id, user))
 
-    def delete(id: String) = tell[MsgResult](userActor, probe)(UserHandler.DeleteUser(id))
+    def delete(id: String) = tell[Response](userActor, probe)(UserHandler.DeleteUser(id))
 
     private def tell[A](actor: ActorRef, probe: TestProbe)(msg: Any)(implicit a: ClassTag[A]): A = {
       actor.tell(msg, probe.ref)
@@ -58,25 +59,25 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
 
   test("create user returns user created if user wasn't there before") {
     val f = fixture(Map.empty)
-    assert(f.create(mockUser) == Right(Message("User created.")))
+    assert(f.create(mockUser) == Response(Message("User created."), StatusCodes.Created))
   }
 
-  test("create user returns error if user already there") {
+  test("create user returns conflict if user already there") {
     val user = mockUser
     val f = fixture(Map("1" -> user))
-    assert(f.create(user) == Left(Message("Cannot create User as User with that ID already exists.")))
+    assert(f.create(user) == Response(Message("Cannot create User as User with that ID already exists."), StatusCodes.Conflict))
   }
 
-  test("create user returns error if organisation is missing") {
+  test("create user returns conflict if organisation is missing") {
     val user = mockUser("1", "2", "1")
     val f = fixture(Map.empty)
-    assert(f.create(user) == Left(Message("Organisation ID doesn't match existing Organisation.")))
+    assert(f.create(user) == Response(Message("Organisation ID doesn't match existing Organisation."), StatusCodes.Conflict))
   }
 
-  test("create user returns error if address is missing") {
+  test("create user returns conflict if address is missing") {
     val user = mockUser("1", "1", "2")
     val f = fixture(Map.empty)
-    assert(f.create(user) == Left(Message("Address ID doesn't match existing Address.")))
+    assert(f.create(user) == Response(Message("Address ID doesn't match existing Address."), StatusCodes.Conflict))
   }
 
   test("create user adds user to actors map") {
@@ -86,22 +87,29 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     assert(f.get("1") == Some(user))
   }
 
-  test("update user returns error if user isn't there") {
+  test("update user returns not found if user isn't there") {
     val f = fixture(Map.empty)
-    assert(f.update("1", mock[User]) == Left(Message("User not found.")))
+    assert(f.update("1", mock[User]) == Response(Message("User not found."), StatusCodes.NotFound))
   }
 
   test("update user returns user updated if user there") {
     val user = mockUser
     val f = fixture(Map("1" -> user))
-    assert(f.update("1", user) == Right(Message("User updated.")))
+    assert(f.update("1", user) == Response(Message("User updated."), StatusCodes.OK))
+  }
+
+  test("update user returns user conflict if organisation missing") {
+    val user = mockUser
+    val newUser = mockUser("1", "2", "1")
+    val f = fixture(Map("1" -> user))
+    assert(f.update("1", newUser) == Response(Message("Organisation ID doesn't match existing Organisation."), StatusCodes.Conflict))
   }
 
   test("cannot update user to id of another user") {
     val oldUser = mockUser
     val blockingUser = mockUser("2", "1", "1")
     val f = fixture(Map("1" -> oldUser, "2" -> blockingUser))
-    assert(f.update("1", blockingUser) == Left(Message("New User ID clashes with another user.")))
+    assert(f.update("1", blockingUser) == Response(Message("New User ID clashes with another user."), StatusCodes.Conflict))
   }
 
   test("update user updates user in actor") {
@@ -122,12 +130,12 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
 
   test("delete user returns user deleted if user was there") {
     val f = fixture(Map("1" -> mock[User]))
-    assert(f.delete("1") == Right(Message("User deleted.")))
+    assert(f.delete("1") == Response(Message("User deleted."), StatusCodes.OK))
   }
 
-  test("delete user returns error if user wasn't there") {
+  test("delete user returns not found if user wasn't there") {
     val f = fixture(Map("1" -> mock[User]))
-    assert(f.delete("2") == Left(Message("User not found.")))
+    assert(f.delete("2") == Response(Message("User not found."), StatusCodes.NotFound))
   }
 
   test("delete user removes user from actor") {

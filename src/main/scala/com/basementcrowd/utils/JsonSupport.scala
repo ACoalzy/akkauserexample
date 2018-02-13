@@ -10,5 +10,5 @@ trait JsonSupport extends SprayJsonSupport {
   implicit val addressJsonFormat = jsonFormat5(Address)
   implicit val organisationJsonFormat = jsonFormat5(Organisation)
   implicit val userJsonFormat = jsonFormat9(User)
-  implicit val actionPerformedJsonFormat = jsonFormat1(Message)
+  implicit val messageJsonFormat = jsonFormat1(Message)
 }

@@ -14,6 +14,7 @@ object Server extends App with UserRoutes {
   implicit val system = ActorSystem("basementcrowd-test")
   implicit val materializer = ActorMaterializer()
 
+  // As no end point to create addresses / organisations create some default ones to allow for user creation
   val addressTable = Map(
     "a1" -> Address("a1", "Apt 30", "3 Example Street", "London", "AB1 2CD"),
     "a2" -> Address("a2", "30 Something Lane", "", "London", "BA4 4RY"),
