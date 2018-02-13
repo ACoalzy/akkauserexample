@@ -2,9 +2,6 @@ package com.basementcrowd.actors
 
 import akka.actor.{Actor, Props}
 import com.basementcrowd.model.{Address, Organisation, User}
-import akka.util.Timeout
-
-import scala.concurrent.duration._
 
 object UserMapActor {
   def props(users: Map[String, User], orgs: Map[String, Organisation], addrs: Map[String, Address]): Props =
@@ -12,9 +9,7 @@ object UserMapActor {
 }
 
 class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisation], initAddr: Map[String, Address]) extends Actor {
-  import com.basementcrowd.actors.UserActor._
-
-  implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
+  import com.basementcrowd.actors.UserHandler._
 
   var users: Map[String, User] = initUsers
   var organisations: Map[String, Organisation] = initOrgs

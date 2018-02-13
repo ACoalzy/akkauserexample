@@ -2,7 +2,7 @@ package com.basementcrowd.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{TestKit, TestProbe}
-import com.basementcrowd.actors.UserActor.{Message, MsgResult}
+import com.basementcrowd.actors.UserHandler.{Message, MsgResult}
 import com.basementcrowd.model.{Address, Organisation, User}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
@@ -23,13 +23,13 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     val probe = TestProbe()
     val userActor = system.actorOf(UserMapActor.props(users, defOrgMap, defAddrMap))
 
-    def get(id: String) = tell[Option[User]](userActor, probe)(UserActor.GetUser(id))
+    def get(id: String) = tell[Option[User]](userActor, probe)(UserHandler.GetUser(id))
 
-    def create(user: User) = tell[MsgResult](userActor, probe)(UserActor.CreateUser(user))
+    def create(user: User) = tell[MsgResult](userActor, probe)(UserHandler.CreateUser(user))
 
-    def update(id: String, user: User) = tell[MsgResult](userActor, probe)(UserActor.UpdateUser(id, user))
+    def update(id: String, user: User) = tell[MsgResult](userActor, probe)(UserHandler.UpdateUser(id, user))
 
-    def delete(id: String) = tell[MsgResult](userActor, probe)(UserActor.DeleteUser(id))
+    def delete(id: String) = tell[MsgResult](userActor, probe)(UserHandler.DeleteUser(id))
 
     private def tell[A](actor: ActorRef, probe: TestProbe)(msg: Any)(implicit a: ClassTag[A]): A = {
       actor.tell(msg, probe.ref)

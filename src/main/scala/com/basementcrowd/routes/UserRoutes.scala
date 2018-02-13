@@ -1,18 +1,18 @@
 package com.basementcrowd.routes
 
-import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.util.Timeout
 import akka.pattern.ask
-import com.basementcrowd.actors.UserActor.MsgResult
-import com.basementcrowd.actors.UserActor
+import akka.util.Timeout
+import com.basementcrowd.actors.UserHandler
+import com.basementcrowd.actors.UserHandler.MsgResult
 import com.basementcrowd.model.User
 import com.basementcrowd.utils.JsonSupport
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 trait UserRoutes extends JsonSupport {
 
@@ -20,8 +20,9 @@ trait UserRoutes extends JsonSupport {
 
   def userActor: ActorRef
 
-  implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
+  implicit lazy val timeout = Timeout(5.seconds)
 
+  // route for all things beginning user
   lazy val route: Route =
     pathPrefix("user") {
       concat(
@@ -30,43 +31,54 @@ trait UserRoutes extends JsonSupport {
         },
         post {
           entity(as[User]) { user =>
-            val userUpdated: Future[MsgResult] = (userActor ? UserActor.CreateUser(user)).mapTo[MsgResult]
-            onSuccess(userUpdated) {
-              chooseStatus(StatusCodes.Conflict, StatusCodes.Created, _)
-            }
+            val userUpdated: Future[MsgResult] = (userActor ? UserHandler.CreateUser(user)).mapTo[MsgResult]
+            chooseStatus(StatusCodes.Conflict, StatusCodes.Created, userUpdated)
           }
         }
       )
     }
 
+  /**
+    * Route for end point /user/id
+    *
+    * @param id
+    * @return
+    */
   def userIdRoute(id: String): Route = {
     concat(
       get {
-        val user: Future[Option[User]] = (userActor ? UserActor.GetUser(id)).mapTo[Option[User]]
+        val user: Future[Option[User]] = (userActor ? UserHandler.GetUser(id)).mapTo[Option[User]]
         onSuccess(user) {
           case Some(user) => complete(user)
-          case None => complete((StatusCodes.NotFound, UserActor.Message("User not found")))
+          case None => complete((StatusCodes.NotFound, UserHandler.Message("User not found")))
         }
       },
       put {
         entity(as[User]) { user =>
-          val userUpdated: Future[MsgResult] = (userActor ? UserActor.UpdateUser(id, user)).mapTo[MsgResult]
-          onSuccess(userUpdated) {
-            chooseStatus(StatusCodes.Conflict, StatusCodes.Created, _)
-          }
+          val userUpdated: Future[MsgResult] = (userActor ? UserHandler.UpdateUser(id, user)).mapTo[MsgResult]
+          chooseStatus(StatusCodes.Conflict, StatusCodes.Created, userUpdated)
         }
       },
       delete {
-        val userDeleted: Future[MsgResult] = (userActor ? UserActor.DeleteUser(id)).mapTo[MsgResult]
-        onSuccess(userDeleted) {
-          chooseStatus(StatusCodes.NotFound, StatusCodes.OK, _)
-        }
+        val userDeleted: Future[MsgResult] = (userActor ? UserHandler.DeleteUser(id)).mapTo[MsgResult]
+        chooseStatus(StatusCodes.NotFound, StatusCodes.OK, userDeleted)
       }
     )
   }
 
-  private def chooseStatus(lStatus: StatusCode, rStatus: StatusCode, choice: MsgResult): Route = choice match {
-    case Left(m) => complete((lStatus, m))
-    case Right(m) => complete((rStatus, m))
-  }
+  /**
+    * Choose left or right status based on future choice being a Left or Right
+    *
+    * @param lStatus
+    * @param rStatus
+    * @param choice
+    * @return
+    */
+  private def chooseStatus(lStatus: StatusCode, rStatus: StatusCode, choice: Future[MsgResult]): Route =
+    onSuccess(choice) {
+      _ match {
+        case Left(m) => complete((lStatus, m))
+        case Right(m) => complete((rStatus, m))
+      }
+    }
 }

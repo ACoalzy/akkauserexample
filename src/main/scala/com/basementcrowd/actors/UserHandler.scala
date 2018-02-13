@@ -2,7 +2,7 @@ package com.basementcrowd.actors
 
 import com.basementcrowd.model.User
 
-object UserActor {
+object UserHandler {
   type MsgResult = Either[Message, Message]
 
   sealed trait CRUD

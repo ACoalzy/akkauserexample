@@ -1,7 +1,7 @@
 package com.basementcrowd.utils
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import com.basementcrowd.actors.UserActor.Message
+import com.basementcrowd.actors.UserHandler.Message
 import com.basementcrowd.model.{Address, Organisation, User}
 
 trait JsonSupport extends SprayJsonSupport {
