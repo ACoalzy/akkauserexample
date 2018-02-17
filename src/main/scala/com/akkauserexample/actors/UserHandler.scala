@@ -1,7 +1,7 @@
-package com.basementcrowd.actors
+package com.akkauserexample.actors
 
 import akka.http.scaladsl.model.StatusCode
-import com.basementcrowd.model.User
+import com.akkauserexample.model.User
 
 object UserHandler {
   sealed trait CRUD

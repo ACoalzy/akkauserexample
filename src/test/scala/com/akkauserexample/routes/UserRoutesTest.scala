@@ -1,4 +1,4 @@
-package com.basementcrowd.routes
+package com.akkauserexample.routes
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshalling.Marshal
@@ -7,9 +7,9 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.FunSuite
 import akka.testkit.TestProbe
-import com.basementcrowd.actors.UserHandler
-import com.basementcrowd.actors.UserHandler.{Message, Response}
-import com.basementcrowd.model.{Address, Organisation, User}
+import com.akkauserexample.actors.UserHandler
+import com.akkauserexample.actors.UserHandler.{Message, Response}
+import com.akkauserexample.model.{Address, Organisation, User}
 
 import scala.concurrent.Future
 

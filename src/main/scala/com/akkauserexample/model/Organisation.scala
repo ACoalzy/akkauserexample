@@ -1,4 +1,4 @@
-package com.basementcrowd.model
+package com.akkauserexample.model
 
 final case class Organisation(
                                id: String,

@@ -1,10 +1,10 @@
-package com.basementcrowd.actors
+package com.akkauserexample.actors
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.StatusCodes
 import akka.testkit.{TestKit, TestProbe}
-import com.basementcrowd.actors.UserHandler.{Message, Response}
-import com.basementcrowd.model.{Address, Organisation, User}
+import com.akkauserexample.actors.UserHandler.{Message, Response}
+import com.akkauserexample.model.{Address, Organisation, User}
 import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{BeforeAndAfterAll, FunSuiteLike}
 

@@ -1,4 +1,4 @@
-package com.basementcrowd.routes
+package com.akkauserexample.routes
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.StatusCodes
@@ -6,10 +6,10 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.basementcrowd.actors.UserHandler
-import com.basementcrowd.actors.UserHandler.{CRUD, Response}
-import com.basementcrowd.model.User
-import com.basementcrowd.utils.JsonSupport
+import com.akkauserexample.actors.UserHandler
+import com.akkauserexample.actors.UserHandler.{CRUD, Response}
+import com.akkauserexample.model.User
+import com.akkauserexample.utils.JsonSupport
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

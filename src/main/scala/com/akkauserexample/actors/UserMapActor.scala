@@ -1,8 +1,8 @@
-package com.basementcrowd.actors
+package com.akkauserexample.actors
 
 import akka.actor.{Actor, Props}
 import akka.http.scaladsl.model.StatusCodes
-import com.basementcrowd.model.{Address, Organisation, User}
+import com.akkauserexample.model.{Address, Organisation, User}
 
 object UserMapActor {
   def props(users: Map[String, User], orgs: Map[String, Organisation], addrs: Map[String, Address]): Props =
@@ -10,7 +10,7 @@ object UserMapActor {
 }
 
 class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisation], initAddr: Map[String, Address]) extends Actor {
-  import com.basementcrowd.actors.UserHandler._
+  import com.akkauserexample.actors.UserHandler._
 
   var users: Map[String, User] = initUsers
   var organisations: Map[String, Organisation] = initOrgs

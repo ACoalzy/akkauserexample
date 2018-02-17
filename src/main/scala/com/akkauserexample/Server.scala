@@ -1,11 +1,11 @@
-package com.basementcrowd
+package com.akkauserexample
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.basementcrowd.actors.UserMapActor
-import com.basementcrowd.model.{Address, Organisation}
-import com.basementcrowd.routes.UserRoutes
+import com.akkauserexample.actors.UserMapActor
+import com.akkauserexample.model.{Address, Organisation}
+import com.akkauserexample.routes.UserRoutes
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
