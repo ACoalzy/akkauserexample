@@ -1,8 +1,9 @@
 package com.akkauserexample.actors
 
 import akka.actor.{Actor, Props}
-import akka.http.scaladsl.model.StatusCodes
+import com.akkauserexample.actors.UserHandler._
 import com.akkauserexample.model.{Address, Organisation, User}
+import com.akkauserexample.utils._
 
 object UserMapActor {
   def props(users: Map[String, User], orgs: Map[String, Organisation], addrs: Map[String, Address]): Props =
@@ -10,7 +11,6 @@ object UserMapActor {
 }
 
 class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisation], initAddr: Map[String, Address]) extends Actor {
-  import com.akkauserexample.actors.UserHandler._
 
   var users: Map[String, User] = initUsers
   var organisations: Map[String, Organisation] = initOrgs
@@ -53,13 +53,13 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     */
   private def createUser(user: User): Response =
     users.get(user.id) match {
-      case Some(_) => Response(Message("Cannot create User as User with that ID already exists."), StatusCodes.Conflict)
+      case Some(_) => Response(Message("Cannot create User as User with that ID already exists."), ResponseCodes.Conflict)
       case None => getOrgAndAddress(user) match {
         case Right(user) => {
           users += user.id -> user
-          Response(Message("User created."), StatusCodes.Created)
+          Response(Message("User created."), ResponseCodes.Created)
         }
-        case Left(m) => Response(m, StatusCodes.Conflict)
+        case Left(m) => Response(m, ResponseCodes.Conflict)
       }
     }
 
@@ -78,15 +78,15 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     val toUpdate = users.get(id)
     val updateTo = if (id != user.id) users.get(user.id) else None
     (toUpdate, updateTo) match {
-      case (None, _) => Response(Message("User not found."), StatusCodes.NotFound)
-      case (_, Some(_)) => Response(Message("New User ID clashes with another user."), StatusCodes.Conflict)
+      case (None, _) => Response(Message("User not found."), ResponseCodes.Missing)
+      case (_, Some(_)) => Response(Message("New User ID clashes with another user."), ResponseCodes.Conflict)
       case (Some(_), _) => getOrgAndAddress(user) match {
         case Right(user) => {
           users -= id
           users += user.id -> user
-          Response(Message("User updated."), StatusCodes.OK)
+          Response(Message("User updated."), ResponseCodes.OK)
         }
-        case Left(m) => Response(m, StatusCodes.Conflict)
+        case Left(m) => Response(m, ResponseCodes.Conflict)
       }
     }
   }
@@ -102,8 +102,8 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     users.get(id) match {
       case Some(_) => {
         users -= id
-        Response(Message("User deleted."), StatusCodes.OK)
+        Response(Message("User deleted."), ResponseCodes.OK)
       }
-      case None => Response(Message("User not found."), StatusCodes.NotFound)
+      case None => Response(Message("User not found."), ResponseCodes.Missing)
     }
 }

@@ -6,10 +6,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.akkauserexample.actors.UserHandler
-import com.akkauserexample.actors.UserHandler.{CRUD, Response}
+import com.akkauserexample.actors.UserHandler._
 import com.akkauserexample.model.User
-import com.akkauserexample.utils.JsonSupport
+import com.akkauserexample.utils._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -31,7 +30,7 @@ trait UserRoutes extends JsonSupport {
         },
         post {
           entity(as[User]) {
-            user => processBasicCRUDRequest(UserHandler.CreateUser(user))
+            user => processBasicCRUDRequest(CreateUser(user))
           }
         }
       )
@@ -46,19 +45,19 @@ trait UserRoutes extends JsonSupport {
   def userIdRoute(id: String): Route = {
     concat(
       get {
-        val user: Future[Option[User]] = (userActor ? UserHandler.GetUser(id)).mapTo[Option[User]]
+        val user: Future[Option[User]] = (userActor ? GetUser(id)).mapTo[Option[User]]
         onSuccess(user) {
           case Some(user) => complete(user)
-          case None => complete((StatusCodes.NotFound, UserHandler.Message("User not found")))
+          case None => complete((StatusCodes.NotFound, Message("User not found")))
         }
       },
       put {
         entity(as[User]) {
-          user => processBasicCRUDRequest(UserHandler.UpdateUser(id, user))
+          user => processBasicCRUDRequest(UpdateUser(id, user))
         }
       },
       delete {
-        processBasicCRUDRequest(UserHandler.DeleteUser(id))
+        processBasicCRUDRequest(DeleteUser(id))
       }
     )
   }
@@ -71,7 +70,7 @@ trait UserRoutes extends JsonSupport {
   private def processBasicCRUDRequest(crud: CRUD): Route = {
     val response: Future[Response] = (userActor ? crud).mapTo[Response]
     onSuccess(response) {
-      case r => complete((r.statusCode, r.message))
+      case r => complete((ResponseCodes.responseToHTTP(r.responseCode), r.message))
     }
   }
 }

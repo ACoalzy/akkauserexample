@@ -10,6 +10,7 @@ import akka.testkit.TestProbe
 import com.akkauserexample.actors.UserHandler
 import com.akkauserexample.actors.UserHandler.{Message, Response}
 import com.akkauserexample.model.{Address, Organisation, User}
+import com.akkauserexample.utils.ResponseCodes
 
 import scala.concurrent.Future
 
@@ -53,22 +54,22 @@ class UserRoutesTest extends FunSuite with ScalaFutures with ScalatestRouteTest 
     checkMsg(request, StatusCodes.NotFound, Message("User not found"))
   }
 
-  test("POST /user passes on status code") {
+  test("POST /user passes on converted response code") {
     val request = Post(uri = "/user").withEntity(dummyEntity)
-    setupProbe(UserHandler.CreateUser(dummyUser), Response(dummyMsg,StatusCodes.Accepted))
-    checkMsg(request, StatusCodes.Accepted, dummyMsg)
+    setupProbe(UserHandler.CreateUser(dummyUser), Response(dummyMsg, ResponseCodes.OK))
+    checkMsg(request, StatusCodes.OK, dummyMsg)
   }
 
   test("PUT /user/id passes on status code") {
     val request = Put(uri = "/user/123").withEntity(dummyEntity)
-    setupProbe(UserHandler.UpdateUser("123", dummyUser), Response(dummyMsg,StatusCodes.Created))
+    setupProbe(UserHandler.UpdateUser("123", dummyUser), Response(dummyMsg, ResponseCodes.Created))
     checkMsg(request, StatusCodes.Created, dummyMsg)
   }
 
   test("DELETE /user/id passes on status code") {
     val request = Delete(uri = "/user/123")
-    setupProbe(UserHandler.DeleteUser("123"), Response(dummyMsg,StatusCodes.OK))
-    checkMsg(request, StatusCodes.OK, dummyMsg)
+    setupProbe(UserHandler.DeleteUser("123"), Response(dummyMsg, ResponseCodes.Missing))
+    checkMsg(request, StatusCodes.NotFound, dummyMsg)
   }
 
 }
