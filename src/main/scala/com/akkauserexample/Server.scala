@@ -27,7 +27,7 @@ object Server extends App with UserRoutes {
 
   val userActor = system.actorOf(UserMapActor.props(Map.empty, organisationTable, addressTable))
 
-  val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
+  val bindingFuture = Http().bindAndHandle(route, "0.0.0.0", 8080)
 
   println(s"Server online at http://localhost:8080/")
 

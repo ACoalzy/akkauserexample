@@ -20,3 +20,8 @@ libraryDependencies ++= Seq(
   "org.scalamock"     %% "scalamock"            % "4.0.0"         % Test,
   "org.mockito"       % "mockito-core"         % "1.9.5"         % Test
 )
+
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
+mainClass in Compile := Some("com.akkauserexample.Server")
