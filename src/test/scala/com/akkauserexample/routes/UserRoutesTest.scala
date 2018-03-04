@@ -44,14 +44,14 @@ class UserRoutesTest extends FunSuite with ScalaFutures with ScalatestRouteTest 
 
   test("GET /user/id handles success") {
     val request = Get(uri = "/user/123")
-    setupProbe(UserHandler.GetUser("123"), Some(dummyUser))
+    setupProbe(UserHandler.GetUser("123"), Right(dummyUser))
     checkUser(request, StatusCodes.OK, dummyUser)
   }
 
   test("GET /user/id handles no result") {
     val request = Get(uri = "/user/123")
-    setupProbe(UserHandler.GetUser("123"), None)
-    checkMsg(request, StatusCodes.NotFound, Message("User not found"))
+    setupProbe(UserHandler.GetUser("123"), Left(Message("User ID doesn't match existing User.")))
+    checkMsg(request, StatusCodes.NotFound, Message("User ID doesn't match existing User."))
   }
 
   test("POST /user passes on converted response code") {

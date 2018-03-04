@@ -45,10 +45,10 @@ trait UserRoutes extends JsonSupport {
   def userIdRoute(id: String): Route = {
     concat(
       get {
-        val user: Future[Option[User]] = (userActor ? GetUser(id)).mapTo[Option[User]]
+        val user: Future[Either[Message, User]] = (userActor ? GetUser(id)).mapTo[Either[Message, User]]
         onSuccess(user) {
-          case Some(user) => complete(user)
-          case None => complete((StatusCodes.NotFound, Message("User not found")))
+          case Right(user) => complete(user)
+          case Left(m) => complete((StatusCodes.NotFound, m))
         }
       },
       put {

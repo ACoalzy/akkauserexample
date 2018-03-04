@@ -17,10 +17,17 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
   var addresses: Map[String, Address] = initAddr
 
   override def receive: Receive = {
-    case GetUser(id) => sender() ! users.get(id)
+    case GetUser(id) => sender() ! getData(id, users, "User")
     case CreateUser(user) => sender() ! createUser(user)
     case UpdateUser(id, user) => sender() ! updateUser(id, user)
     case DeleteUser(id) => sender() ! deleteUser(id)
+  }
+
+  private def getData[A](id: String, dataMap: Map[String, A], name: String): Either[Message, A] = {
+    dataMap.get(id) match {
+      case Some(d) => Right(d)
+      case None => Left(Message(s"$name ID doesn't match existing $name."))
+    }
   }
 
   /**
@@ -31,15 +38,10 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     * @return
     */
   private def getOrgAndAddress(user: User): Either[Message, User] = {
-    val org = organisations.get(user.organisation.id)
-    val address = addresses.get(user.address.id)
-    (org, address) match {
-      case (Some(o), Some(a)) => {
-        Right(user.copy(organisation = o, address = a))
-      }
-      case (None, _) => Left(Message("Organisation ID doesn't match existing Organisation."))
-      case (_, None) => Left(Message("Address ID doesn't match existing Address."))
-    }
+    for {
+      o <- getData(user.organisation.id, organisations, "Organisation")
+      a <- getData(user.address.id, addresses, "Address")
+    } yield (user.copy(organisation = o, address = a))
   }
 
   /**
@@ -80,7 +82,7 @@ class UserMapActor(initUsers: Map[String, User], initOrgs: Map[String, Organisat
     (toUpdate, updateTo) match {
       case (None, _) => Response(Message("User not found."), ResponseCodes.Missing)
       case (_, Some(_)) => Response(Message("New User ID clashes with another user."), ResponseCodes.Conflict)
-      case (Some(_), _) => getOrgAndAddress(user) match {
+      case _ => getOrgAndAddress(user) match {
         case Right(user) => {
           users -= id
           users += user.id -> user

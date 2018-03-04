@@ -11,7 +11,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 object Server extends App with UserRoutes {
-  implicit val system = ActorSystem("basementcrowd-test")
+  implicit val system = ActorSystem("akkauserexample")
   implicit val materializer = ActorMaterializer()
 
   // As no end point to create addresses / organisations create some default ones to allow for user creation

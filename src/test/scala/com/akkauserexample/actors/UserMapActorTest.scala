@@ -24,7 +24,7 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     val probe = TestProbe()
     val userActor = system.actorOf(UserMapActor.props(users, defOrgMap, defAddrMap))
 
-    def get(id: String) = tell[Option[User]](userActor, probe)(UserHandler.GetUser(id))
+    def get(id: String) = tell[Either[Message, User]](userActor, probe)(UserHandler.GetUser(id))
 
     def create(user: User) = tell[Response](userActor, probe)(UserHandler.CreateUser(user))
 
@@ -49,12 +49,12 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
   test("get user returns user if exists") {
     val users = Map("0" -> mock[User], "1" -> mock[User], "2" -> mock[User])
     val f = fixture(users)
-    assert(f.get("1") == Some(users("1")))
+    assert(f.get("1") == Right(users("1")))
   }
 
   test("get users returns None if doesn't exist") {
     val f = fixture(Map("0" -> mock[User], "3" -> mock[User], "2" -> mock[User]))
-    assert(f.get("1") == None)
+    assert(f.get("1") == Left(Message("User ID doesn't match existing User.")))
   }
 
   test("create user returns user created if user wasn't there before") {
@@ -84,7 +84,7 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     val user = mockUser
     val f = fixture(Map.empty)
     f.create(user)
-    assert(f.get("1") == Some(user))
+    assert(f.get("1") == Right(user))
   }
 
   test("update user returns not found if user isn't there") {
@@ -117,7 +117,7 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     val newUser = mockUser
     val f = fixture(Map("1" -> oldUser))
     f.update("1", newUser)
-    assert(f.get("1") == Some(newUser))
+    assert(f.get("1") == Right(newUser))
   }
 
   test("update user can update users id") {
@@ -125,7 +125,7 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
     val newUser = mockUser("2", "1", "1")
     val f = fixture(Map("1" -> oldUser))
     f.update("1", newUser)
-    assert(f.get("2") == Some(newUser))
+    assert(f.get("2") == Right(newUser))
   }
 
   test("delete user returns user deleted if user was there") {
@@ -141,7 +141,7 @@ class UserMapActorTest(_system: ActorSystem) extends TestKit(_system) with FunSu
   test("delete user removes user from actor") {
     val f = fixture(Map("1" -> mock[User]))
     f.delete("1")
-    assert(f.get("1") == None)
+    assert(f.get("1") == Left(Message("User ID doesn't match existing User.")))
   }
 
 }
